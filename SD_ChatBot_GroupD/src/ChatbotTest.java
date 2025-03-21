@@ -1,12 +1,13 @@
 
 import org.junit.jupiter.api.Test;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
+
 class ChatbotTest {
 
 
-
     @Test
-
     void testGetClothingSuggestion() {
 
         assertEquals("Carry an umbrella and wear waterproof clothing.", ClothingRecommender.getClothingSuggestion("Temperature: 15°C, rain"));
