@@ -52,7 +52,7 @@ public class WeatherAPI {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.connect();
-            // Check if the response code is OK (200)
+
             int responseCode = conn.getResponseCode();
             if (responseCode != 200) {
                 return "Error: Unable to fetch weather data.";

@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class WeatherAPITest {
     @Test
     void testValidLocationWeather() {
-        // This test checks if we get a response for a valid location
+        //This test checks if we get a response for a valid location
         String response = WeatherAPI.getWeather("New York");
         assertNotNull(response);
     }
