@@ -1,31 +1,46 @@
-
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Arrays;
+import java.util.List;
 
-class ClothingRecommenderTest {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class ClothingRecommenderTest {
 
     @Test
-    void testGetClothingSuggestion() {
+    public void testSunnyMorningSuggestion() {
+        String result = ClothingRecommender.getClothingSuggestion("Sunny", 0);
+        assertTrue(result.contains("light clothing"));
+        assertTrue(result.contains("sunglasses"));
+        assertTrue(result.contains("morning"));
+    }
 
-        // Testing for rain condition.
-        assertEquals("Carry an umbrella and wear waterproof clothing.",
-                ClothingRecommender.getClothingSuggestion("Temperature: 15°C, rain"));
+    @Test
+    public void testRainyAfternoonSuggestion() {
+        String result = ClothingRecommender.getClothingSuggestion("Rain", 1);
+        assertTrue(result.contains("raincoat"));
+        assertTrue(result.contains("Afternoon"));
+    }
 
-        // Testing for snow condition.
-        assertEquals("Wear warm clothes, a coat, gloves, and a scarf.",
-                ClothingRecommender.getClothingSuggestion("Temperature: -5°C, snow"));
+    @Test
+    public void testColdEveningSuggestion() {
+        String result = ClothingRecommender.getClothingSuggestion("Cold", 2);
+        assertTrue(result.contains("Dress warmly"));
+        assertTrue(result.contains("Evening"));
+    }
 
-        // Testing for clear weather condition.
-        assertEquals("Wear light clothes and sunglasses.",
-                ClothingRecommender.getClothingSuggestion("Temperature: 25°C, clear"));
+    @Test
+    public void testPersonalizedSuggestionWithRaincoat() {
+        List<String> wardrobe = Arrays.asList("Raincoat", "Boots", "Hat");
+        String result = ClothingRecommender.getPersonalizedClothingSuggestion("Rain", wardrobe);
+        assertTrue(result.contains("You can wear your raincoat"));
+    }
 
-        // Testing for cold weather condition.
-        assertEquals("Wear a jacket and warm clothing.",
-                ClothingRecommender.getClothingSuggestion("Temperature: 5°C, cold"));
-
-        // Testing for hot weather condition.
-        assertEquals("Wear breathable fabrics like cotton and drink plenty of water.",
-                ClothingRecommender.getClothingSuggestion("Temperature: 35°C, hot"));
+    @Test
+    public void testPersonalizedSuggestionWithoutRainItems() {
+        List<String> wardrobe = Arrays.asList("T-shirt", "Jeans");
+        String result = ClothingRecommender.getPersonalizedClothingSuggestion("Rain", wardrobe);
+        assertTrue(result.contains("Based on your wardrobe"));
+        assertTrue(!result.contains("raincoat"));
     }
 }
