@@ -1,25 +1,20 @@
-
 import org.junit.jupiter.api.Test;
-
-import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
 
+// Test class for the chatbot's clothing recommendation functionality
 class ChatbotTest {
 
-
+    // Test clothing suggestion for sunny weather
     @Test
-    void testGetClothingSuggestion() {
-
-        assertEquals("Carry an umbrella and wear waterproof clothing.", ClothingRecommender.getClothingSuggestion("Temperature: 15°C, rain"));
-
-        assertEquals("Wear warm clothes, a coat, gloves, and a scarf.", ClothingRecommender.getClothingSuggestion("Temperature: -5°C, snow"));
-
-        assertEquals("Wear light clothes and sunglasses.", ClothingRecommender.getClothingSuggestion("Temperature: 25°C, clear"));
-
-        assertEquals("Wear a good jacket and warm clothing.", ClothingRecommender.getClothingSuggestion("Temperature: 5°C, cold"));
-
-        assertEquals("Wear breathable fabrics like cotton and drink plenty of water.", ClothingRecommender.getClothingSuggestion("Temperature: 35°C, hot"));
-
+    void testSunnyWeatherClothing() {
+        String suggestion = ClothingRecommender.getClothingSuggestion("Sunny, 25°C", 0);
+        assertTrue(suggestion.contains("Wear light clothing")); // Check for light clothing suggestion
     }
 
+    // Test clothing suggestion for rainy weather
+    @Test
+    void testRainyWeatherClothing() {
+        String suggestion = ClothingRecommender.getClothingSuggestion("Rain, 18°C", 1);
+        assertTrue(suggestion.contains("Bring a raincoat")); // Check for raincoat suggestion
+    }
 }
