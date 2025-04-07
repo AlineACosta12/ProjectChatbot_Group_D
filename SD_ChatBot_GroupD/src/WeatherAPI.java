@@ -1,63 +1,25 @@
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Scanner;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class WeatherAPI {
-
-    // Method to get latitude and longitude using a geolocation API
-    private static double[] getCoordinates(String location) {
-        String apiKey = "YOUR_API_KEY";  // Replace with actual API key
-        String urlString = "https://api.opencagedata.com/geocode/v1/json?q=" + location + "&key=" + apiKey;
-        try {
-            // Create URL and open connection
-            URL url = new URL(urlString);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.connect();
-            // Read the response from the API
-            Scanner scanner = new Scanner(url.openStream());
-            StringBuilder inline = new StringBuilder();
-            while (scanner.hasNext()) {
-                inline.append(scanner.nextLine());
-            }
-            scanner.close();
-            //Convert the response to JSON and extract coordinates
-            JSONObject data = new JSONObject(inline.toString());
-            JSONObject locationData = data.getJSONArray("results").getJSONObject(0).getJSONObject("geometry");
-            double latitude = locationData.getDouble("lat");
-            double longitude = locationData.getDouble("lng");
-            // Return coordinates as an array
-            return new double[]{latitude, longitude};
-        } catch (Exception e) {
-            return null;  // Handle geolocation error
-        }
-    }
-
-    // Method to fetch weather data for a given location
+class WeatherAPI {
     public static String getWeather(String location) {
-        // Get coordinates from location
-        double[] coordinates = getCoordinates(location);
-        if (coordinates == null) {
-            return "Error: Invalid location.";
-        }
-
-        double latitude = coordinates[0];
-        double longitude = coordinates[1];
-
-        // Build weather API URL using the coordinates
         try {
-            String urlString = "https://api.open-meteo.com/v1/forecast?latitude=" + latitude + "&longitude=" + longitude + "&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,humidity_2m_max&timezone=auto";
+            double[] coordinates = GeolocationAPI.getCoordinates(location);
+            if (coordinates == null) return "Error: Location not found.";
+
+            String urlString = "https://api.open-meteo.com/v1/forecast?latitude=" + coordinates[0] + "&longitude=" + coordinates[1] + "&current_weather=true";
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.connect();
 
-            int responseCode = conn.getResponseCode();
-            if (responseCode != 200) {
-                return "Error: Unable to fetch weather data.";
-            }
-            // Read the response from the API
+            if (conn.getResponseCode() != 200) return "Error: Unable to fetch weather data.";
+
             Scanner scanner = new Scanner(url.openStream());
             StringBuilder inline = new StringBuilder();
             while (scanner.hasNext()) {
@@ -68,14 +30,41 @@ public class WeatherAPI {
             JSONObject data = new JSONObject(inline.toString());
             JSONObject currentWeather = data.getJSONObject("current_weather");
             double temperature = currentWeather.getDouble("temperature");
-            double windSpeed = currentWeather.getDouble("windspeed");
-            // Determine weather description based on wind speed
-            String description = windSpeed > 20 ? "Windy" : "Clear";
+            String description = currentWeather.getDouble("windspeed") > 20 ? "windy" : "clear";
 
-            // Include humidity, temperature, and wind speed
-            return "Temperature: " + temperature + "°C, " + description + ", Wind: " + windSpeed + " km/h";
+            return "Temperature: " + temperature + "°C, " + description;
         } catch (Exception e) {
             return "Error: " + e.getMessage();
+        }
+    }
+}
+
+class GeolocationAPI {
+    public static double[] getCoordinates(String location) {
+        try {
+            String encodedLocation = URLEncoder.encode(location, "UTF-8");
+            String urlString = "https://nominatim.openstreetmap.org/search?q=" + encodedLocation + "&format=json&limit=1";
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.connect();
+
+            if (conn.getResponseCode() != 200) return null;
+
+            Scanner scanner = new Scanner(url.openStream());
+            StringBuilder inline = new StringBuilder();
+            while (scanner.hasNext()) {
+                inline.append(scanner.nextLine());
+            }
+            scanner.close();
+
+            JSONArray results = new JSONArray(inline.toString());
+            if (results.length() == 0) return null;
+
+            JSONObject locationData = results.getJSONObject(0);
+            return new double[]{locationData.getDouble("lat"), locationData.getDouble("lon")};
+        } catch (Exception e) {
+            return null;
         }
     }
 }
