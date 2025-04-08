@@ -1,55 +1,134 @@
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.time.LocalDate;
+
 public class ChatbotGUI extends Application {
-    private TextArea outputArea;
-    private TextField locationInput;
+    private VBox chatContainer;
+    private DatePicker startDatePicker;   // Trip start date
+    private TextField locationInput;      // Trip location
+    private TextField dayInput;           // Visit day (1-3)
 
     public static void main(String[] args) {
-        launch(args); // Launch the JavaFX application
+        launch(args); // Start JavaFX app
     }
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Trip Clothing Planner Chatbot"); // Set window title
+        primaryStage.setTitle("Trip Clothing Planner Chatbot");
 
-        Label locationLabel = new Label("Enter Location:"); // Label for input
-        locationInput = new TextField(); // Text field for user input
-        Button fetchWeatherButton = new Button("Get Weather & Clothing Suggestion"); // Button to trigger fetch
-        outputArea = new TextArea(); // Text area for output
-        outputArea.setEditable(false); // Make output read-only
+        // Chat message area
+        chatContainer = new VBox(10);
+        chatContainer.setPadding(new Insets(20));
+        chatContainer.setPrefWidth(450);
 
-        fetchWeatherButton.setOnAction(e -> fetchWeather()); // Set button action
+        ScrollPane scrollPane = new ScrollPane(chatContainer);
+        scrollPane.setFitToWidth(true);
 
-        VBox layout = new VBox(10); // Vertical layout with spacing
-        layout.setPadding(new Insets(10)); // Set padding
-        layout.getChildren().addAll(locationLabel, locationInput, fetchWeatherButton, outputArea); // Add elements
+        // Input fields
+        startDatePicker = new DatePicker();
+        startDatePicker.setPromptText("Trip Start Date (YYYY-MM-DD)");
+        locationInput = new TextField();
+        locationInput.setPromptText("Enter location...");
+        dayInput = new TextField();
+        dayInput.setPromptText("Visit day (1-3)");
 
-        Scene scene = new Scene(layout, 500, 400); // Create scene
-        primaryStage.setScene(scene); // Set scene on stage
-        primaryStage.show(); // Show the GUI
+        // Button to get weather and clothing advice
+        Button fetchWeatherButton = new Button("Get Weather & Suggestion");
+        fetchWeatherButton.setOnAction(e -> fetchWeather());
+
+        // Input layout
+        HBox inputBox = new HBox(10, startDatePicker, locationInput, dayInput, fetchWeatherButton);
+        inputBox.setPadding(new Insets(10));
+        inputBox.setAlignment(Pos.CENTER);
+
+        // Main layout
+        VBox layout = new VBox(scrollPane, inputBox);
+        Scene scene = new Scene(layout, 600, 600);
+        scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
+
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+        // Welcome messages
+        addBotMessage("Hi! I'm Wardrobot your trip clothing assistant.");
+        addBotMessage("Enter your trip start date, a location, and visit day (1-3) to get suggestions.");
     }
 
+    // Handle button click: fetch weather and clothing suggestions
     private void fetchWeather() {
-        String location = locationInput.getText(); // Get location from input
-        if (location.isEmpty()) {
-            outputArea.setText("Please enter a location."); // Show error if input is empty
+        LocalDate startDate = startDatePicker.getValue();
+        String location = locationInput.getText();
+        String dayStr = dayInput.getText();
+
+        // Validate inputs
+        if (startDate == null || location.isEmpty() || dayStr.isEmpty()) {
+            addBotMessage("Please enter the trip start date, location, and visit day.");
             return;
         }
 
-        String weatherInfo = WeatherAPI.getWeather(location); // Fetch weather data
-
-        // Build clothing suggestions for 3 days
-        StringBuilder suggestions = new StringBuilder("Clothing Suggestions:\n");
-        for (int i = 0; i < 3; i++) {
-            suggestions.append("Day " + (i + 1) + ": " + ClothingRecommender.getClothingSuggestion(weatherInfo, i) + "\n");
+        int day;
+        try {
+            day = Integer.parseInt(dayStr);
+        } catch (NumberFormatException ex) {
+            addBotMessage("Visit day must be a number between 1 and 3.");
+            return;
         }
 
-        // Display weather info and suggestions
-        outputArea.setText("Weather in " + location + ":\n" + weatherInfo + "\n\n" + suggestions);
+        if (day < 1 || day > 3) {
+            addBotMessage("Visit day must be between 1 and 3.");
+            return;
+        }
+
+        // Calculate visit date
+        LocalDate visitDate = startDate.plusDays(day - 1);
+        addUserMessage("Location: " + location + ", Visit Date: " + visitDate);
+
+        // Fetch weather and clothing info
+        String weatherInfo = WeatherAPI.getWeather(location, visitDate.toString());
+        String clothingSuggestion = ClothingRecommender.getClothingSuggestion(weatherInfo, day - 1);
+
+        // Display results
+        addBotMessage("Weather in " + location + " on " + visitDate + ":\n" + weatherInfo);
+        addBotMessage("Clothing Suggestion for Day " + day + ":\n" + clothingSuggestion);
+    }
+
+    // Show bot message in chat
+    private void addBotMessage(String text) {
+        HBox row = new HBox(10);
+        row.setAlignment(Pos.TOP_LEFT);
+        ImageView avatar = new ImageView(new Image(getClass().getResourceAsStream("/images/robot.face.png")));
+        avatar.setFitWidth(45);
+        avatar.setFitHeight(45);
+        Label bubble = new Label(text);
+        bubble.setWrapText(true);
+        bubble.getStyleClass().add("bot-bubble");
+        bubble.setFont(Font.font(14));
+        row.getChildren().addAll(avatar, bubble);
+        chatContainer.getChildren().add(row);
+    }
+
+    // Show user message in chat
+    private void addUserMessage(String text) {
+        HBox row = new HBox(10);
+        row.setAlignment(Pos.TOP_RIGHT);
+        Label bubble = new Label(text);
+        bubble.setWrapText(true);
+        bubble.getStyleClass().add("user-bubble");
+        bubble.setFont(Font.font(14));
+        ImageView avatar = new ImageView(new Image(getClass().getResourceAsStream("/images/Avatar.png")));
+        avatar.setFitWidth(45);
+        avatar.setFitHeight(45);
+        row.getChildren().addAll(bubble, avatar);
+        chatContainer.getChildren().add(row);
     }
 }
