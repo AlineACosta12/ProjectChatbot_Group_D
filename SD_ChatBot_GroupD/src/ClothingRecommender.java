@@ -15,7 +15,7 @@ public class ClothingRecommender {
         } else if (weather.contains("Cold")) {
             suggestion = "Dress warmly with a jacket,gloves and hat and try get some hot chocolate.";
         } else {
-            suggestion = "Dress appropriately for moderate weather.";
+            suggestion = "Dress appropriately for moderate weather with your own style.";
         }
         if (dayIndex == 0) {
             suggestion += " It's morning, consider a light jacket.";

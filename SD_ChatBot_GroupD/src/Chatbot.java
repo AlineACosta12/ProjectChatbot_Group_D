@@ -32,7 +32,7 @@ public class Chatbot {
             System.out.println("Weather in " + locations[i] + " on " + visitDate + ": " + weatherInfo);
             System.out.println("Clothing Suggestion for Day " + visitDays[i] + ": " +
                     ClothingRecommender.getClothingSuggestion(weatherInfo, visitDays[i] - 1));
-            System.out.println("I hope you enjoy your travel! I'm glad to help you, Bye! ");
+            System.out.println("I hope you enjoy your travel! I'm glad to help you, Bye, see you soon! ");
         }
         scanner.close();
     }
