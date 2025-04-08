@@ -9,7 +9,7 @@ public class ClothingRecommender {
     public static String getClothingSuggestion(String weather, int dayIndex) {
         String suggestion = "";
         if (weather.contains("Sunny")) {
-            suggestion = "Wear light clothing, sunglasses, and don't forget the sunscreen.";
+            suggestion = "Wear light clothing, sunglasses, and don't forget the sunscreen!";
         } else if (weather.contains("Rain")) {
             suggestion = "Bring a raincoat and waterproof shoes and an beautiful umbrella.";
         } else if (weather.contains("Cold")) {
