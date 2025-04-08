@@ -1,38 +1,39 @@
+
+
 import java.util.Scanner;
+import java.time.LocalDate;
 
 public class Chatbot {
-
-
     public static void main(String[] args) {
-
-        Scanner scanner = new Scanner(System.in); // Create scanner object for user input
-
-        // Welcome message
+        Scanner scanner = new Scanner(System.in);
         System.out.println("Welcome to the Trip Clothing Planner Chatbot!");
+        System.out.println("Im Wadrobot!");
 
-        // Ask for the number of locations
-        System.out.println("Enter the number of locations you will visit: ");
-        int numLocations = scanner.nextInt(); // Get the number of locations
-        scanner.nextLine(); // Clear the buffer
+        // Ask for trip start date.
+        System.out.println("Please enter the start date of your trip (YYYY-MM-DD):");
+        String startDateStr = scanner.nextLine();
+        LocalDate startDate = LocalDate.parse(startDateStr);
 
-        // Loop through each location
-        for (int i = 1; i <= numLocations; i++) {
-
-            // Ask for location name
-            System.out.println("Enter location " + i + ":");
-            String location = scanner.nextLine();
-
-            // Fetch weather information for the location
-            String weatherInfo = WeatherAPI.getWeather(location); // Fetch weather data from the API
-
-            // Display the weather information
-            System.out.println("Weather in " + location + ": " + weatherInfo);
-
-            // Suggest clothing based on weather data
-            System.out.println("Clothing Suggestion: " + ClothingRecommender.getClothingSuggestion(weatherInfo));
-
+        // Collect 5 locations and visit day (1-3) for each location.
+        String[] locations = new String[5];
+        int[] visitDays = new int[5];
+        for (int i = 0; i < 5; i++) {
+            System.out.println("Enter location " + (i + 1) + ":");
+            locations[i] = scanner.nextLine();
+            System.out.println("Enter visit day (1-3) for " + locations[i] + ":");
+            visitDays[i] = scanner.nextInt();
+            scanner.nextLine(); // Clear buffer.
         }
 
-        scanner.close(); // Close the scanner to free up resources
+        // Process each location: compute visit date, fetch weather, and suggest clothing.
+        for (int i = 0; i < 5; i++) {
+            LocalDate visitDate = startDate.plusDays(visitDays[i] - 1);
+            String weatherInfo = WeatherAPI.getWeather(locations[i], visitDate.toString());
+            System.out.println("Weather in " + locations[i] + " on " + visitDate + ": " + weatherInfo);
+            System.out.println("Clothing Suggestion for Day " + visitDays[i] + ": " +
+                    ClothingRecommender.getClothingSuggestion(weatherInfo, visitDays[i] - 1));
+            System.out.println("I hope you enjoy your travel! I'm glad to help you, Bye! ");
+        }
+        scanner.close();
     }
 }
