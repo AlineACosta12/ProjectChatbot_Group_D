@@ -7,7 +7,7 @@ public class Chatbot {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Welcome to the Trip Clothing Planner Chatbot!");
-        System.out.println("Im Wadrobot!");
+        System.out.println("I'm Wadrobot!");
 
         // Ask for trip start date.
         System.out.println("Please enter the start date of your trip (YYYY-MM-DD):");
@@ -32,8 +32,10 @@ public class Chatbot {
             System.out.println("Weather in " + locations[i] + " on " + visitDate + ": " + weatherInfo);
             System.out.println("Clothing Suggestion for Day " + visitDays[i] + ": " +
                     ClothingRecommender.getClothingSuggestion(weatherInfo, visitDays[i] - 1));
-            System.out.println("I hope you enjoy your travel! I'm glad to help you, Bye, see you soon!!!git ");
+
         }
+        System.out.println("I hope you enjoy your travel! I'm glad to help you, Bye, see you soon!!!");
         scanner.close();
+
     }
 }
