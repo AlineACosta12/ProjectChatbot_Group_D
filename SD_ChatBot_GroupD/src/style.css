@@ -1,0 +1,29 @@
+/* Bot message bubble style */
+.bot-bubble {
+    -fx-background-color: #e1a971;
+    -fx-padding: 10;                   /* Inner spacing */
+    -fx-background-radius: 12;         /* Rounded corners */
+    -fx-max-width: 400;                /* Max width of message */
+}
+
+/* User message bubble style */
+.user-bubble {
+    -fx-background-color: #5193e1;
+    -fx-text-fill: white;
+    -fx-padding: 10;                   /* Inner spacing */
+    -fx-background-radius: 12;         /* Rounded corners */
+    -fx-max-width: 400;                /* Max width of message */
+}
+
+/* Container for all chat messages */
+.chat-container {
+    -fx-padding: 30;                   /* Outer spacing */
+    -fx-spacing: 20;                   /* Space between messages */
+}
+
+/* Avatar style */
+.avatar {
+    -fx-min-width: 60px;               /* Minimum width */
+    -fx-min-height: 60px;              /* Minimum height */
+    -fx-background-radius: 40;         /* Circular shape */
+}
