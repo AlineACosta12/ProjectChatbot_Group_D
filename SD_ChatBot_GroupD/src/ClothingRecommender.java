@@ -20,7 +20,7 @@ public class ClothingRecommender {
         if (dayIndex == 0) {
             suggestion += " It's morning, consider a light jacket.";
         } else if (dayIndex == 1) {
-            suggestion += " Afternoon, light clothing is fine.";
+            suggestion += " Afternoon, light clothing is fine!";
         } else {
             suggestion += " Evening, perhaps a sweater or jacket.";
         }
