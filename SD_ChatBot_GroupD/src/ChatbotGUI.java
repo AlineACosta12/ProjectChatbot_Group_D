@@ -1,4 +1,5 @@
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -7,12 +8,12 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
-import java.util.logging.Level;
+import java.time.format.DateTimeParseException;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 public class ChatbotGUI extends Application {
@@ -22,10 +23,18 @@ public class ChatbotGUI extends Application {
 
     // UI components
     private VBox chatContainer;             // Container for displaying chat messages
-    private DatePicker startDatePicker;  // For trip start date input
-    private TextField locationInput;       // For location input
-    private TextField dayInput;            // For visit day (1-3) input
+    private DatePicker startDatePicker;     // For trip start date input
+    private TextField locationInput;        // For location input
+    private TextField dayInput;             // For visit day (1-3) input
     private ProgressIndicator progressIndicator; // Loading spinner for data fetching
+    private Button actionButton;            // Button to drive sequential input
+
+    // State variables for step-by-step flow
+    private int step = 0;                   // 0: date, 1-10: locations/days, 11: fetch, 12: restart prompt
+    private LocalDate startDate;
+    private String[] locations = new String[5];
+    private int[] visitDays = new int[5];
+    private int currentIndex = 0;           // Index from 0 to 4
 
     public static void main(String[] args) {
         launch(args); // Launch JavaFX application
@@ -50,16 +59,18 @@ public class ChatbotGUI extends Application {
 
         locationInput = new TextField();
         locationInput.setPromptText("Enter location...");
+        locationInput.setDisable(true);
 
         dayInput = new TextField();
         dayInput.setPromptText("Visit day (1-3)");
+        dayInput.setDisable(true);
 
-        // Button to trigger weather and clothing suggestion fetch
-        Button fetchWeatherButton = new Button("Get Weather & Suggestion");
-        fetchWeatherButton.setOnAction(e -> fetchWeather());
+        // Button to drive the flow
+        actionButton = new Button("Submit");
+        actionButton.setOnAction(e -> onAction());
 
         // Input layout grouping
-        HBox inputBox = new HBox(10, startDatePicker, locationInput, dayInput, fetchWeatherButton);
+        HBox inputBox = new HBox(10, startDatePicker, locationInput, dayInput, actionButton);
         inputBox.setPadding(new Insets(10));
         inputBox.setAlignment(Pos.CENTER);
 
@@ -78,72 +89,159 @@ public class ChatbotGUI extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        // Initial welcome messages from the chatbot
-        addBotMessage("Hi! I'm Wardrobot, your trip clothing assistant.");
-        addBotMessage("Enter your trip start date, a location, and visit day (1-3) to get suggestions.");
+        // Start the conversation
+        askDate();
     }
 
-    // Handles the logic for fetching weather and clothing suggestions
-    private void fetchWeather() {
-        // Get input values
-        LocalDate startDate = startDatePicker.getValue();
-        String location = locationInput.getText();
-        String dayStr = dayInput.getText();
-
-        // Input validation
-        if (startDate == null || location.isEmpty() || dayStr.isEmpty()) {
-            addBotMessage("Please enter the trip start date, location, and visit day.");
-            logger.warning("Missing required fields: start date, location, or day.");
-            return;
+    // Handles the Submit button based on current step
+    private void onAction() {
+        switch (step) {
+            case 0 -> handleDate();
+            case 1,3,5,7,9 -> handleLocation();
+            case 2,4,6,8,10 -> handleDay();
+            default -> {}
         }
+    }
 
-        int day;
+    // ask for trip start date
+    private void askDate() {
+        addBotMessage("Welcome to the Trip Clothing Planner Chatbot!\n");
+        addBotMessage("I'm Wadrobot! Packing can be tricky but I'm here to simplify your travel planning!\n");
+        addBotMessage("Please enter the start date of your trip (YYYY-MM-DD):");
+        step = 0;
+        startDatePicker.setDisable(false);
+        locationInput.setDisable(true);
+        dayInput.setDisable(true);
+    }
+
+    private void handleDate() {
         try {
-            day = Integer.parseInt(dayStr);
-        } catch (NumberFormatException ex) {
-            addBotMessage("Visit day must be a number between 1 and 3.");
-            logger.warning("Invalid visit day input: " + dayStr);
+            startDate = startDatePicker.getValue();
+            if (startDate == null) throw new DateTimeParseException("null", "", 0);
+            addUserMessage(startDate.toString());
+            startDatePicker.setDisable(true);
+            step = 1;
+            askLocation();
+        } catch (DateTimeParseException ex) {
+            addBotMessage("Invalid date format. Please try again using YYYY-MM-DD:");
+            logger.warning("Invalid date input");
+        }
+    }
+
+    // Ask for the current location
+    private void askLocation() {
+        addBotMessage("Enter location " + (currentIndex + 1) + ":");
+        locationInput.clear();
+        locationInput.setDisable(false);
+        dayInput.setDisable(true);
+    }
+
+    private void handleLocation() {
+        String loc = locationInput.getText().trim();
+        if (loc.isEmpty()) {
+            addBotMessage("Enter location " + (currentIndex + 1) + ":");
             return;
         }
+        locations[currentIndex] = loc;
+        addUserMessage(loc);
+        locationInput.setDisable(true);
+        step++;
+        askDay();
+    }
 
-        if (day < 1 || day > 3) {
-            addBotMessage("Visit day must be between 1 and 3.");
-            logger.warning("Invalid visit day: " + day);
-            return;
-        }
+    // Ask for the visit day for current location
+    private void askDay() {
+        addBotMessage("Enter visit day (1-3) for " + locations[currentIndex] + ":");
+        dayInput.clear();
+        dayInput.setDisable(false);
+    }
 
-        logger.info("Fetching weather data for location: " + location + " on day: " + day);
-
-        // Show progress indicator while fetching data
-        progressIndicator.setVisible(true);
-
-        // Calculate visit date
-        LocalDate visitDate = startDate.plusDays(day - 1);
-        addUserMessage("Location: " + location + ", Visit Date: " + visitDate);
-
-        // Run the data fetching in a background thread
-        new Thread(() -> {
-            try {
-                // Simulate delay (e.g., API request)
-                Thread.sleep(2000);
-
-                // Retrieve weather and clothing info from backend classes
-                String weatherInfo = WeatherAPI.getWeather(location, visitDate.toString());
-                String clothingSuggestion = ClothingRecommender.getClothingSuggestion(weatherInfo, day - 1);
-
-                // Update UI on JavaFX thread
-                javafx.application.Platform.runLater(() -> {
-                    progressIndicator.setVisible(false); // Hide loader
-                    addBotMessage("Weather in " + location + " on " + visitDate + ":\n" + weatherInfo);
-                    addBotMessage("Clothing Suggestion for Day " + day + ":\n" + clothingSuggestion);
-                    logger.info("Weather fetched for " + location + ": " + weatherInfo);
-                    logger.info("Clothing suggestion: " + clothingSuggestion);
-                });
-
-            } catch (InterruptedException e) {
-                logger.severe("Error fetching weather data: " + e.getMessage());
+    private void handleDay() {
+        String d = dayInput.getText().trim();
+        try {
+            int day = Integer.parseInt(d);
+            if (day < 1 || day > 3) throw new NumberFormatException();
+            visitDays[currentIndex] = day;
+            addUserMessage(String.valueOf(day));
+            dayInput.setDisable(true);
+            currentIndex++;
+            if (currentIndex < 5) {
+                step++;
+                askLocation();
+            } else {
+                step = 11;
+                fetchAll();
             }
+        } catch (NumberFormatException ex) {
+            addBotMessage("Invalid visit day. Please enter a number between 1 and 3.");
+            logger.warning("Invalid visit day input");
+        }
+    }
+
+    // fetch and display all weather & clothing
+    private void fetchAll() {
+        progressIndicator.setVisible(true);
+        new Thread(() -> {
+            // Simulate delay and fetch
+            for (int i = 0; i < 5; i++) {
+                try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+                LocalDate date = startDate.plusDays(visitDays[i] - 1);
+                String weatherInfo = WeatherAPI.getWeather(locations[i], date.toString());
+                String clothingSuggestion = ClothingRecommender.getClothingSuggestion(weatherInfo, visitDays[i] - 1);
+                int idx = i;
+                Platform.runLater(() -> {
+                    addBotMessage("Weather in " + locations[idx] + " on " + date + ": " + weatherInfo);
+                    addBotMessage("Clothing Suggestion for Day " + visitDays[idx] + ": " + clothingSuggestion);
+                });
+            }
+            Platform.runLater(() -> {
+                progressIndicator.setVisible(false);
+                promptRestart();
+            });
         }).start();
+    }
+
+    // Ask user if they want another trip
+    private void promptRestart() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Plan Another Trip?");
+        alert.setHeaderText(null);
+        alert.setContentText("Would you like to plan another trip? (yes/no)");
+
+        ButtonType yes = new ButtonType("yes");
+        ButtonType no  = new ButtonType("no");
+        alert.getButtonTypes().setAll(yes, no);
+
+        Optional<ButtonType> res = alert.showAndWait();
+        if (res.isPresent() && res.get() == yes) {
+            resetAll();
+        } else {
+            addBotMessage("\nThanks for sharing your plans!");
+            addBotMessage("I hope you have an amazing journey! 👋 Safe travels!");
+            disableAll();
+        }
+    }
+
+    // Reset state for a new trip
+    private void resetAll() {
+        step = 0;
+        currentIndex = 0;
+        startDatePicker.setValue(null);
+        resetInputs();
+        askDate();
+    }
+
+    // Disable inputs after no
+    private void disableAll() {
+        startDatePicker.setDisable(true);
+        locationInput.setDisable(true);
+        dayInput.setDisable(true);
+        actionButton.setDisable(true);
+    }
+
+    private void resetInputs() {
+        locationInput.clear();
+        dayInput.clear();
     }
 
     // Add a bot message to the chat container
