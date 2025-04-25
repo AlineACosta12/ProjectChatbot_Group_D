@@ -1,56 +1,91 @@
-
-
-import java.util.List;
-
-// ClothingRecommender provides clothing suggestions based on weather information.
+// Main class definition
 public class ClothingRecommender {
 
-    // Returns a suggestion based on weather info and visit day.
+    // This method returns a clothing suggestion based on the weather description and time of day (dayIndex).
     public static String getClothingSuggestion(String weather, int dayIndex) {
-        String suggestion = "";
-        if (weather.contains("Sunny")) {
-            suggestion = "Wear light clothing, sunglasses, and don't forget the sunscreen!";
-        } else if (weather.contains("Rain")) {
-            suggestion = "Bring a raincoat and waterproof shoes and an beautiful umbrella.";
-        } else if (weather.contains("Cold")) {
-            suggestion = "Dress warmly with a jacket,gloves and hat and try get some hot chocolate.";
-        } else {
-            suggestion = "Dress appropriately for moderate weather with your own style.";
-        }
-        if (dayIndex == 0) {
-            suggestion += " It's morning, consider a light jacket.";
-        } else if (dayIndex == 1) {
-            suggestion += " Afternoon, light clothing is fine!";
-        } else {
-            suggestion += " Evening, perhaps a sweater or jacket.";
-        }
-        return suggestion;
-    }
+        StringBuilder suggestion = new StringBuilder(); // Used to build the final suggestion string.
+        weather = weather.toLowerCase(); // Normalize weather string to lowercase for easier matching.
 
-    // Overloaded method: returns suggestion based solely on weather description.
-    public static String getClothingSuggestion(String weatherDescription) {
-        weatherDescription = weatherDescription.toLowerCase();
-        if (weatherDescription.contains("rain")) {
-            return "Carry an umbrella and wear waterproof clothing.";
-        } else if (weatherDescription.contains("snow")) {
-            return "Wear warm clothes, a coat, gloves, and a scarf.";
-        } else if (weatherDescription.contains("clear")) {
-            return "Wear light clothes and sunglasses.";
-        } else if (weatherDescription.contains("cold") || weatherDescription.contains("5°c")) {
-            return "Wear a good jacket and warm clothing.";
-        } else if (weatherDescription.contains("hot") || weatherDescription.contains("35°c")) {
-            return "Wear breathable fabrics like cotton and drink plenty of water.";
-        } else {
-            return "Check the weather forecast and dress accordingly.";
-        }
-    }
+        double temperature = 20.0; // Default temperature if parsing fails.
 
-    // Returns personalized suggestions based on user's wardrobe.
-    public static String getPersonalizedClothingSuggestion(String weather, List<String> wardrobeItems) {
-        String suggestion = "Based on your wardrobe:\n";
-        if (wardrobeItems.contains("Raincoat") && weather.contains("Rain")) {
-            suggestion += "You can wear your raincoat today.";
+        // Try to extract a temperature value from the weather string.
+        try {
+            int index = weather.indexOf("°c");
+            if (index > 0) {
+                int start = index;
+
+                // Walk backwards to find the beginning of the temperature number (can include negative sign and decimal).
+                while (start > 0 && (Character.isDigit(weather.charAt(start - 1)) ||
+                        weather.charAt(start - 1) == '.' ||
+                        weather.charAt(start - 1) == '-')) {
+                    start--;
+                }
+
+                // Parse the number between start and "°C".
+                temperature = Double.parseDouble(weather.substring(start, index));
+            }
+        } catch (Exception e) {
+            // If anything goes wrong, stick with the default temperature of 20.0.
         }
-        return suggestion;
+
+        //Main clothing suggestion based on weather conditions and parsed temperature.
+        if (weather.contains("rain")) {
+            // If "rain" is mentioned in the forecast.
+            suggestion.append("☔ Rain alert! Grab your cutest raincoat and waterproof boots — bonus points if your umbrella matches!");
+        } else if (weather.contains("snow") || temperature <= 0) {
+            // Cold or snowy weather.
+            suggestion.append("❄️ Snowy vibes today! Bundle up with a coat, scarf, gloves — and maybe do a snow angel or two?");
+        } else if (temperature > 0 && temperature <= 10) {
+            // Cold but not freezing.
+            suggestion.append("🥶 It's chilly out! Rock that puffer jacket, gloves, and a hat — hot chocolate highly recommended!");
+        } else if (temperature > 10 && temperature <= 20) {
+            // Mild weather.
+            suggestion.append("🍂 Mild weather ahead! Think layers — maybe a hoodie or a stylish light jacket.");
+        } else if (temperature > 20 && temperature <= 30) {
+            // Warm and sunny.
+            suggestion.append("🌞 Sun’s out, style’s out! Go for light clothing, sunglasses, and slap on some SPF like a responsible explorer.");
+        } else if (temperature > 30) {
+            // Very hot.
+            suggestion.append("🔥 Hot hot hot! Stick to breathable fabrics (hello, cotton!), stay hydrated, and maybe skip the black outfit.");
+        } else {
+            // If temperature parsing was weird or doesn't match any condition.
+            suggestion.append("🤔 Hmm, it’s a bit unpredictable. Go with your gut — layers might be a smart call.");
+        }
+
+        // Add extra tips based on the time of day.
+        switch (dayIndex) {
+            case 0: // Morning (condition).
+                if (temperature <= 10) {
+                    suggestion.append(" Since it’s a chilly morning, a warm drink and an extra layer will go a long way.");
+                } else if (temperature > 25) {
+                    suggestion.append(" Morning heat is real — dress light and start early if you're going out.");
+                } else {
+                    suggestion.append(" Since it’s the morning, pack a light jacket just in case.");
+                }
+                break;
+
+            case 1: // Afternoon (condition).
+                if (weather.contains("rain")) {
+                    suggestion.append(" Rainy afternoons call for waterproof gear and cozy indoor plans.");
+                } else if (temperature > 30) {
+                    suggestion.append(" Blazing afternoon! Avoid peak sun hours and keep water close.");
+                } else {
+                    suggestion.append(" Afternoon adventures? Keep it comfy and airy.");
+                }
+                break;
+
+            case 2: // Evening (condition).
+                if (temperature <= 10) {
+                    suggestion.append(" Evening chill incoming — grab a warm coat and maybe some gloves.");
+                } else if (weather.contains("rain")) {
+                    suggestion.append(" Evening rain is no joke — stay dry and maybe carry a flashlight too.");
+                } else {
+                    suggestion.append(" Evening stroll? A cozy sweater wouldn't hurt.");
+                }
+                break;
+        }
+
+        // Return the final composed suggestion.
+        return suggestion.toString();
     }
 }
