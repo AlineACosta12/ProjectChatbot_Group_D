@@ -44,6 +44,10 @@ class WeatherAPI {
             return "Error: " + e.getMessage();
         }
     }
+
+    public static String getWeather(String location) {
+        return location;
+    }
 }
 
 // GeolocationAPI gets the latitude and longitude for a given location using Nominatim API.
