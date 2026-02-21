@@ -44,50 +44,91 @@ Use the built-in continuous integration in GitLab.
 
 ***
 
-# Editing this README
+# Wardrobot — Weather & Clothing Trip Planner Chatbot (Group D)
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+Wardrobot is a Java chatbot that helps users plan what to wear for a trip by fetching real-time weather data for multiple locations and generating clothing recommendations based on conditions (e.g., rain, cold, clear) and context such as time of day. :contentReference[oaicite:1]{index=1}
 
-## Suggestions for a good README
+## Project Purpose
+This project was built to support users planning a trip (up to **5 locations across 3 days**) by providing:
+- Weather information per location/date
+- Practical clothing suggestions (e.g., umbrella for rain, warm layers for cold weather)
+- A friendly, guided conversation flow (console + GUI) :contentReference[oaicite:2]{index=2}
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## Key Features
+- **Weather lookup** using a third-party Weather API (Open-Meteo) :contentReference[oaicite:3]{index=3}
+- **Location → coordinates** support via geolocation handling (so users can type place names) :contentReference[oaicite:4]{index=4}
+- **Clothing recommendations** based on weather conditions and temperature (rain/snow/clear/windy, etc.) :contentReference[oaicite:5]{index=5}
+- **Multi-location and forecast handling** (designed around the “trip planning” scenario) :contentReference[oaicite:6]{index=6}
+- **JavaFX GUI** for improved user interaction (alongside a console flow) :contentReference[oaicite:7]{index=7}
+- **JUnit 5 test suite** covering WeatherAPI, chatbot flow, and clothing recommendation logic :contentReference[oaicite:8]{index=8}
 
-## Name
-Choose a self-explaining name for your project.
+## Tech Stack
+- **Java**
+- **JavaFX** (GUI)
+- **Open-Meteo Weather API** (weather data) :contentReference[oaicite:9]{index=9}
+- **org.json** (JSON parsing) :contentReference[oaicite:10]{index=10}
+- **JUnit 5** (unit testing) :contentReference[oaicite:11]{index=11}
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+## High-Level Architecture
+Main components (as described in the documentation): :contentReference[oaicite:12]{index=12}
+- `Chatbot` — manages conversation flow and user input
+- `WeatherAPI` — requests and parses weather data (JSON) from the external API
+- `ClothingRecommender` — converts weather info into clothing suggestions
+- Test classes (JUnit 5):
+  - `ChatbotTest`
+  - `WeatherAPITest`
+  - `ClothingRecommenderTest`
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## How to Run
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+### Prerequisites
+- Java JDK installed (recommended: JDK 17+)
+- Internet connection (API calls require it)
+- JavaFX configured (if running the GUI)
+- org.json library available in the project dependencies :contentReference[oaicite:13]{index=13}
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### Option A — Run the Console Version
+1. Open the project in your IDE (e.g., IntelliJ / Eclipse).
+2. Locate the `Chatbot` class.
+3. Run the `main()` method.
+4. Follow the prompts:
+   - Enter location(s)
+   - The chatbot fetches weather and outputs clothing recommendations :contentReference[oaicite:14]{index=14}
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### Option B — Run the JavaFX GUI
+1. Ensure JavaFX is configured in your IDE/project.
+2. Locate the GUI entry class (commonly `ChatbotGUI.java`).
+3. Run the GUI class.
+4. Use the interface to enter locations and receive weather + clothing suggestions. :contentReference[oaicite:15]{index=15}
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+## Running Tests
+This project includes **JUnit 5** tests that verify:
+- Valid/invalid location handling in the Weather API
+- Clothing recommendations for different conditions (sunny/rainy/cold + time-of-day scenarios)
+- End-to-end chatbot behaviour checks :contentReference[oaicite:16]{index=16}
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Run tests from your IDE’s test runner (JUnit) or your build tool if configured.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+## Version Control Workflow (Team)
+- Stable code in `main`
+- Feature work in separate branches per developer (GUI / Weather API / Recommendations)
+- Frequent commits, code reviews, and milestone-based development :contentReference[oaicite:17]{index=17}
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+## Future Improvements (Ideas)
+Some enhancements described/planned across milestones include:
+- richer UI/UX and responsiveness
+- improved forecast detail (e.g., wind/humidity/conditions)
+- more personalised suggestions (wardrobe-based recommendations)
+- optional accessibility features (speech-to-text) :contentReference[oaicite:18]{index=18}
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## Authors
+- Aline Andrade Costa
+- Cynthia da Silva Roque
+- Sergio Alves da Silva :contentReference[oaicite:19]{index=19}
 
 ## License
-For open source projects, say how it is licensed.
+- For academic projects
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## Project Status
+- Completed as a second-year Software Development / Server-Side related team project.
+- Further improvements may be added in future iterations.
